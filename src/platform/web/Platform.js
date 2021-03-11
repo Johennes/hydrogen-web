@@ -115,6 +115,10 @@ export class Platform {
         this.isIE11 = isIE11;
     }
 
+    get notificationService() {
+        return this._serviceWorkerHandler;
+    }
+
     get updateService() {
         return this._serviceWorkerHandler;
     }

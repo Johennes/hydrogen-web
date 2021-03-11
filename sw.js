@@ -1,0 +1,1 @@
+src/platform/web/service-worker.template.js

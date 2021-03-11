@@ -115,5 +115,15 @@ export class SettingsViewModel extends ViewModel {
         const logExport = await this.logger.export();
         this.platform.saveFileAs(logExport.asBlob(), `hydrogen-logs-${this.platform.clock.now()}.json`);
     }
+
+    get supportsNotifications() {
+        return !!this.platform.notificationService;
+    }
+
+    async enablePushNotifications() {
+        if (this.platform.notificationService) {
+            const result = await this.platform.notificationService.enablePushNotifications();
+        }
+    }
 }
 

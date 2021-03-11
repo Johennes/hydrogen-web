@@ -14,10 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// 3 (imaginary) interfaces are implemented here:
+// 4 (imaginary) interfaces are implemented here:
 // - OfflineAvailability (done by registering the sw)
 // - UpdateService (see checkForUpdate method, and should also emit events rather than showing confirm dialog here)
 // - ConcurrentAccessBlocker (see preventConcurrentSessionAccess method)
+// - NotificationService (see enablePushNotifications)
+
+import {Pusher} from "../../../matrix/push/Pusher.js";
+
 export class ServiceWorkerHandler {
     constructor() {
         this._waitingForReply = new Map();
@@ -166,5 +170,30 @@ export class ServiceWorkerHandler {
 
     async preventConcurrentSessionAccess(sessionId) {
         return this._sendAndWaitForReply("closeSession", {sessionId});
+    }
+
+    async enablePushNotifications(pusherFactory = Pusher) {
+        if (this._registrationPromise) {
+            await this._registrationPromise;
+        }
+        if (this._registration.pushManager) {
+            const subscription = await this._registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: "BNYtdPa5ccnu8AvoMSQVuIuBU94Z-w3aJo7u2qIV6p20b0PCiamqzckCH38yRCbTUIFzXzqIgvjbFguK9Id-0zc",
+            });
+            const subscriptionData = subscription.toJSON();
+            const pushkey = subscriptionData.keys.p256dh;
+            const data = {
+                endpoint: subscriptionData.endpoint,
+                auth: subscriptionData.keys.auth,
+            };
+            return pusherFactory.httpPusher(
+                "http://localhost:5000",
+                "io.element.hydrogen.web",
+                pushkey,
+                data
+            );
+        }
+        
     }
 }
