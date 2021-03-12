@@ -65,6 +65,8 @@ export class ServiceWorkerHandler {
             this._closeSessionIfNeeded(sessionId).finally(() => {
                 event.source.postMessage({replyTo: data.id});
             });
+        } else if (data.type === "openRoom") {
+            this._navigation.push("room", data.payload.roomId);
         }
     }
 

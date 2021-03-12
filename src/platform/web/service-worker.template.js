@@ -182,8 +182,52 @@ self.addEventListener('message', (event) => {
     }
 });
 
+async function openClientFromNotif(event) {
+    const clientList = await self.clients.matchAll({
+        type: "window"
+    });
+    console.log("clientList", clientList);
+    const {sessionId, roomId} = event.notification.data;
+    for (let i = 0; i < clientList.length; i++) {
+        const client = clientList[i];
+        const url = new URL(client.url, baseURL);
+        console.log("client url", url);
+        if (url.hash.startsWith(`#/session/${sessionId}`)) {
+            client.postMessage({type: "openRoom", payload: {roomId}});
+            if ('focus' in client) {
+                await client.focus();
+            }
+            console.log("went with this client");
+            return;
+        }
+    }
+    if (self.clients.openWindow) {
+        await self.clients.openWindow(`/#/session/${sessionId}/room/${roomId}`);
+    }
+}
+
+self.addEventListener('notificationclick', event => {
+    event.notification.close();
+    event.waitUntil(openClientFromNotif(event));
+});
+
 self.addEventListener('push', event => {
-    console.log("got a push message", event);
+    const n = event.data.json();
+    console.log("got a push message", n);
+    if (n.sender_display_name && n.event_id) {
+        let label;
+        if (n.room_name) {
+            label = `${n.sender_display_name} wrote you in ${n.room_name}`;
+        } else {
+            label = `${n.sender_display_name} wrote you`;
+        }
+        self.registration.showNotification(label, {
+            data: {
+                sessionId: n.session_id,
+                roomId: n.room_id,
+            }
+        });
+    }
 });
 
 async function closeSession(sessionId, requestingClientId) {
