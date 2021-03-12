@@ -466,6 +466,15 @@ export class Session {
     get user() {
         return this._user;
     }
+
+    async enablePush(pusher) {
+        return this._platform.logger.run("enablePush", async log => {
+            pusher.setSessionId(this._sessionInfo.id);
+            const result = await pusher.enable(this._hsApi, log);
+            log.set("result", result);
+            return result;
+        });
+    }
 }
 
 export function tests() {

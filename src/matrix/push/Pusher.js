@@ -3,10 +3,10 @@ export class Pusher {
         this._description = description;
     }
 
-    static httpPusher(url, appId, pushkey, data) {
+    static httpPusher(host, appId, pushkey, data) {
         return new Pusher({
             kind: "http",
-            data: Object.assign({}, data, {url}),
+            data: Object.assign({}, data, {url: host + "/_matrix/push/v1/notify"}),
             pushkey,
             app_id: appId,
             app_display_name: "Hydrogen",
@@ -15,7 +15,12 @@ export class Pusher {
         });
     }
 
-    enablePusher(hsApi) {
-        return hsApi.setPusher(this._description);
+    setSessionId(sessionId) {
+        this._description.data["session_id"] = sessionId;
+    }
+
+    enable(hsApi, log) {
+        log.set("description", this._description);
+        return hsApi.setPusher(this._description, {log}).response();
     }
 }

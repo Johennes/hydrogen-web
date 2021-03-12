@@ -122,7 +122,8 @@ export class SettingsViewModel extends ViewModel {
 
     async enablePushNotifications() {
         if (this.platform.notificationService) {
-            const result = await this.platform.notificationService.enablePushNotifications();
+            const pusher = await this.platform.notificationService.enablePushNotifications();
+            await this._session.enablePush(pusher);
         }
     }
 }
