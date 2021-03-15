@@ -188,11 +188,13 @@ async function openClientFromNotif(event) {
     });
     console.log("clientList", clientList);
     const {sessionId, roomId} = event.notification.data;
+    const roomURL = `/#/session/${sessionId}/room/${roomId}`;
     for (let i = 0; i < clientList.length; i++) {
         const client = clientList[i];
         const url = new URL(client.url, baseURL);
         console.log("client url", url);
         if (url.hash.startsWith(`#/session/${sessionId}`)) {
+            // just do `client.navigate` here.
             client.postMessage({type: "openRoom", payload: {roomId}});
             if ('focus' in client) {
                 await client.focus();
@@ -202,7 +204,7 @@ async function openClientFromNotif(event) {
         }
     }
     if (self.clients.openWindow) {
-        await self.clients.openWindow(`/#/session/${sessionId}/room/${roomId}`);
+        await self.clients.openWindow(roomURL);
     }
 }
 

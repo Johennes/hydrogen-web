@@ -16,7 +16,7 @@ export class Pusher {
     }
 
     setSessionId(sessionId) {
-        this._description.data["session_id"] = sessionId;
+        this._description.data["default_payload"] = {session_id: sessionId};
     }
 
     enable(hsApi, log) {
